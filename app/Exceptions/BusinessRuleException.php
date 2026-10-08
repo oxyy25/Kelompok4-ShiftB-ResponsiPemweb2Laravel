@@ -6,7 +6,7 @@ use RuntimeException;
 
 /**
  * Pelanggaran aturan bisnis (jadwal bentrok, transisi status tidak valid, dll).
- * Dirender oleh SipinlabServiceProvider menjadi response JSON seragam.
+ * Dirender di bootstrap/app.php menjadi response JSON seragam via ApiResponse.
  */
 class BusinessRuleException extends RuntimeException
 {

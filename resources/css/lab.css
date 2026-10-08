@@ -1,15 +1,51 @@
 :root {
-    --ink: #12263a;
-    --teal: #0d7c86;
-    --teal-dark: #0a5f67;
-    --paper: #f4f7f8;
+    --paper: #ffffff;
+    --ink: #17233f;
+    --muted: #5b6b85;
+    --line: #e3e8f0;
+    --wash: #f4f6fb;
+    --accent: #2547f4;
+    --accent-dark: #1a35c2;
 }
 body { font-family: 'IBM Plex Sans', system-ui, sans-serif; background: var(--paper); color: var(--ink); }
-.navbar-sipinlab { background: var(--ink); }
-.navbar-brand { font-weight: 700; letter-spacing: .01em; }
-.btn-teal { background: var(--teal); border-color: var(--teal); color: #fff; }
-.btn-teal:hover, .btn-teal:focus { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
-.link-teal { color: var(--teal); }
-.auth-wrap { min-height: calc(100vh - 56px); }
-.auth-card { max-width: 440px; width: 100%; border: 1px solid #d5dee2; border-radius: .5rem; background: #fff; }
-.form-control:focus { border-color: var(--teal); box-shadow: 0 0 0 .2rem rgba(13,124,134,.2); }
+/* Kepala garis rambut: batas tipis, bukan blok warna. */
+.site-head { background: var(--paper); border-bottom: 1px solid var(--line); }
+.brand { color: var(--ink); font-weight: 700; text-decoration: none; }
+.brand-mark { display: inline-block; width: .7rem; height: .7rem; background: var(--accent); border-radius: 2px; }
+.site-nav .nav-link { color: var(--muted); padding: .25rem 0; margin-right: 1.25rem; text-decoration: none; }
+.site-nav .nav-link:hover { color: var(--ink); }
+.site-nav .nav-link.active { color: var(--ink); box-shadow: inset 0 -2px 0 var(--accent); }
+/* Label seksi kapital kecil: motif penanda yang berulang. */
+.kicker { color: var(--muted); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+.rule { border-top: 1px solid var(--line); }
+.skip-link { position: absolute; left: -9999px; top: 0; background: var(--ink); color: #fff; padding: .5rem 1rem; z-index: 1050; }
+.skip-link:focus { left: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Satu aksen tindakan untuk aksi utama tiap layar. */
+.act { background: var(--accent); border: 1px solid var(--accent); color: #fff; min-height: 44px; border-radius: 4px; }
+.act:hover, .act:focus { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+.act-ghost { background: #fff; border: 1px solid var(--line); color: var(--ink); min-height: 44px; border-radius: 4px; }
+.act-ghost:hover, .act-ghost:focus { border-color: var(--ink); color: var(--ink); }
+.act-sm { min-height: 0; }
+.link-ink { color: var(--accent-dark); }
+/* Panel jadwal satu-satunya bidang bertinta: menandai konten waktu. */
+.time-panel { background: var(--wash); border: 1px solid var(--line); border-radius: 4px; }
+.sheet { border: 1px solid var(--line); border-radius: 4px; background: #fff; }
+/* Tabel minimal: tajuk kapital kecil, baris bergaris rambut. */
+.grid-table { font-variant-numeric: tabular-nums; }
+.grid-table thead th { border-bottom: 1px solid var(--ink); color: var(--muted); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 500; }
+.grid-table tbody td { border-bottom: 1px solid var(--line); vertical-align: middle; }
+/* Lencana status garis tipis: fakta berbingkai, tanpa blok warna kecuali perhatian aktif. */
+.badge-status { font-weight: 500; border-radius: 4px; }
+.st-diajukan { background: #fff; color: var(--accent-dark); border: 1px solid var(--accent); }
+.st-disetujui { background: var(--accent); color: #fff; }
+.st-selesai { background: var(--ink); color: #fff; }
+.st-ditolak, .st-dibatalkan { background: #fff; color: var(--muted); border: 1px solid var(--line); }
+.tag-on { background: var(--accent); color: #fff; }
+.tag-off { background: #fff; color: var(--muted); border: 1px solid var(--line); }
+/* Daftar definisi untuk halaman detail. */
+.spec dt { color: var(--muted); font-weight: 400; }
+.spec dd { margin-bottom: .75rem; }
+.form-control, .form-select { border-radius: 4px; }
+.form-control:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 .2rem rgba(37,71,244,.15); }
+.site-foot { border-top: 1px solid var(--line); color: var(--muted); font-size: .875rem; }

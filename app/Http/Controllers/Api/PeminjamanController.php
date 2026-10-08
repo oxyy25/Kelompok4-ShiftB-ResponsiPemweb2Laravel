@@ -7,7 +7,6 @@ use App\Http\Requests\SetujuiPeminjamanRequest;
 use App\Http\Requests\StorePeminjamanRequest;
 use App\Http\Requests\TolakPeminjamanRequest;
 use App\Http\Requests\UpdatePeminjamanRequest;
-use App\Http\Resources\PeminjamanCollection;
 use App\Http\Resources\PeminjamanResource;
 use App\Models\Peminjaman;
 use App\Services\PeminjamanService;
@@ -18,9 +17,7 @@ use Illuminate\Support\Facades\Gate;
 
 class PeminjamanController extends ApiController
 {
-    public function __construct(private readonly PeminjamanService $service)
-    {
-    }
+    public function __construct(private readonly PeminjamanService $service) {}
 
     /**
      * GET /api/peminjaman
@@ -30,6 +27,10 @@ class PeminjamanController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
+
+        if (! $user) {
+            return ApiResponse::error('Belum login atau token tidak valid.', 401);
+        }
 
         $query = Peminjaman::query()
             ->with(['user', 'lab', 'alats'])
@@ -56,7 +57,7 @@ class PeminjamanController extends ApiController
 
         return ApiResponse::paginated(
             $query->paginate($this->perPage($request))->withQueryString(),
-            PeminjamanCollection::class,
+            PeminjamanResource::class,
             'Daftar peminjaman berhasil diambil'
         );
     }

@@ -23,9 +23,9 @@ class UpdatePeminjamanRequest extends FormRequest
             'tanggal' => ['sometimes', 'required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'jam_mulai' => ['sometimes', 'required', 'date_format:H:i'],
             'jam_selesai' => ['sometimes', 'required', 'date_format:H:i'],
-            'alat' => ['sometimes', 'array'],
+            'alat' => ['sometimes', 'array', 'max:50'],
             'alat.*.alat_id' => ['required', 'integer', 'distinct', 'exists:alats,id'],
-            'alat.*.jumlah' => ['required', 'integer', 'min:1'],
+            'alat.*.jumlah' => ['required', 'integer', 'min:1', 'max:100000'],
         ];
     }
 

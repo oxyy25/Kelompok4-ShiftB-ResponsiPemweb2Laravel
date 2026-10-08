@@ -28,6 +28,9 @@ class PeminjamanService
     public function ajukan(User $user, array $data): Peminjaman
     {
         return DB::transaction(function () use ($user, $data) {
+            // Kunci baris user agar dua request bersamaan tidak lolos batas maksimal (TOCTOU).
+            User::whereKey($user->id)->lockForUpdate()->first();
+
             $this->batasiPengajuanAktif($user);
 
             $lab = $this->ambilLabAktif((int) $data['lab_id']);
@@ -203,16 +206,21 @@ class PeminjamanService
 
     public function hapus(Peminjaman $peminjaman): void
     {
-        $final = [StatusPeminjaman::Ditolak, StatusPeminjaman::Dibatalkan, StatusPeminjaman::Selesai];
+        DB::transaction(function () use ($peminjaman) {
+            // Muat ulang dengan lock agar status tidak stale antara route-binding dan delete.
+            $p = Peminjaman::whereKey($peminjaman->id)->lockForUpdate()->firstOrFail();
 
-        if (! in_array($peminjaman->status, $final, true)) {
-            throw new BusinessRuleException(
-                'Hanya data berstatus ditolak, dibatalkan, atau selesai yang dapat dihapus.',
-                409
-            );
-        }
+            $final = [StatusPeminjaman::Ditolak, StatusPeminjaman::Dibatalkan, StatusPeminjaman::Selesai];
 
-        $peminjaman->delete(); // baris pivot ikut terhapus (cascadeOnDelete)
+            if (! in_array($p->status, $final, true)) {
+                throw new BusinessRuleException(
+                    'Hanya data berstatus ditolak, dibatalkan, atau selesai yang dapat dihapus.',
+                    409
+                );
+            }
+
+            $p->delete(); // baris pivot ikut terhapus (cascadeOnDelete)
+        });
     }
 
     // ------------------------------------------------------------------
@@ -255,6 +263,10 @@ class PeminjamanService
     /** BR-02 */
     private function validasiJamOperasional(string $mulai, string $selesai): void
     {
+        if ($mulai >= $selesai) {
+            throw ValidationException::withMessages(['jam_selesai' => ['Jam selesai harus setelah jam mulai.']]);
+        }
+
         $buka = Carbon::parse(config('sipinlab.jam_buka'))->format('H:i:s');
         $tutup = Carbon::parse(config('sipinlab.jam_tutup'))->format('H:i:s');
 
@@ -375,7 +387,13 @@ class PeminjamanService
                 throw ValidationException::withMessages(["alat.{$i}.alat_id" => ['Alat tidak ditemukan.']]);
             }
 
-            $hasil[] = ['index' => $i, 'alat' => $alat, 'jumlah' => (int) $item['jumlah']];
+            $jumlah = (int) ($item['jumlah'] ?? 0);
+
+            if ($jumlah < 1) {
+                throw ValidationException::withMessages(["alat.{$i}.jumlah" => ['Jumlah alat minimal 1.']]);
+            }
+
+            $hasil[] = ['index' => $i, 'alat' => $alat, 'jumlah' => $jumlah];
         }
 
         return $hasil;

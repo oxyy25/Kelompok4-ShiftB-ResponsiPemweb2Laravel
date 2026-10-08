@@ -47,10 +47,12 @@ class UserController extends ApiController
     /** PUT /api/users/{user} (admin) */
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
+        Gate::authorize('update', $user);
+
         $data = $request->validated();
 
         if (isset($data['role']) && (int) $user->id === (int) $request->user()->id && $data['role'] !== $user->role->value) {
-            throw new BusinessRuleException('Anda tidak dapat mengubah role akun Anda sendiri.', 409);
+            throw new BusinessRuleException('Anda tidak dapat mengubah role akun Anda sendiri.', 403);
         }
 
         // 'role' tidak ada di $fillable (mencegah mass assignment), jadi diset eksplisit.
@@ -60,7 +62,7 @@ class UserController extends ApiController
         $user->fill($data); // password otomatis di-hash oleh cast 'hashed' pada model User
 
         if ($role !== null) {
-            $user->role = RoleUser::from($role);
+            $user->role = RoleUser::tryFrom($role) ?? $user->role;
         }
 
         $user->save();
@@ -74,7 +76,7 @@ class UserController extends ApiController
         Gate::authorize('delete', $user);
 
         if ((int) $user->id === (int) $request->user()->id) {
-            throw new BusinessRuleException('Anda tidak dapat menghapus akun Anda sendiri.', 409);
+            throw new BusinessRuleException('Anda tidak dapat menghapus akun Anda sendiri.', 403);
         }
 
         if ($user->peminjaman()->exists()) {

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\StatusPeminjaman;
 use App\Models\Peminjaman;
 use App\Models\User;
 
@@ -18,16 +19,18 @@ class PeminjamanPolicy
         return $user->isAdmin() || (int) $peminjaman->user_id === (int) $user->id;
     }
 
-    /** Hanya pemilik yang boleh mengubah pengajuannya. */
+    /** Hanya pemilik yang boleh mengubah pengajuannya selama masih diajukan. */
     public function update(User $user, Peminjaman $peminjaman): bool
     {
-        return (int) $peminjaman->user_id === (int) $user->id;
+        return (int) $peminjaman->user_id === (int) $user->id
+            && $peminjaman->status === StatusPeminjaman::Diajukan;
     }
 
-    /** Hanya pemilik yang boleh membatalkan. */
+    /** Hanya pemilik yang boleh membatalkan selama masih diajukan. */
     public function cancel(User $user, Peminjaman $peminjaman): bool
     {
-        return (int) $peminjaman->user_id === (int) $user->id;
+        return (int) $peminjaman->user_id === (int) $user->id
+            && $peminjaman->status === StatusPeminjaman::Diajukan;
     }
 
     /** Setujui / tolak / selesai: khusus admin. */

@@ -13,6 +13,10 @@ class Alat extends Model
 
     protected $fillable = ['lab_id', 'nama', 'stok', 'kondisi'];
 
+    protected $casts = [
+        'stok' => 'integer',
+    ];
+
     public function lab(): BelongsTo
     {
         return $this->belongsTo(Lab::class);
@@ -21,6 +25,6 @@ class Alat extends Model
     public function peminjaman(): BelongsToMany
     {
         return $this->belongsToMany(Peminjaman::class, 'alat_peminjaman')
-                    ->withPivot('jumlah');
+            ->withPivot('jumlah');
     }
 }

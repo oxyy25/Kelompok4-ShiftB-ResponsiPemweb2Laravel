@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\StatusPeminjaman;
 use App\Enums\TujuanPeminjaman;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ class Peminjaman extends Model
 {
     use HasFactory;
 
-    protected $table = 'peminjamas';  
+    protected $table = 'peminjamas';
 
     protected $fillable = [
         'user_id', 'lab_id', 'judul_kegiatan', 'tujuan', 'keterangan',
@@ -46,17 +47,17 @@ class Peminjaman extends Model
     public function alats(): BelongsToMany
     {
         return $this->belongsToMany(Alat::class, 'alat_peminjaman')
-                    ->withPivot('jumlah');
+            ->withPivot('jumlah');
     }
 
-    public function scopeBentrok($query, $labId, $tanggal, $jamMulai, $jamSelesai)
+    public function scopeBentrok(Builder $query, $labId, $tanggal, $jamMulai, $jamSelesai): Builder
     {
         return $query->where('lab_id', $labId)
             ->where('tanggal', $tanggal)
             ->where('status', StatusPeminjaman::Disetujui)
             ->where(function ($q) use ($jamMulai, $jamSelesai) {
                 $q->where('jam_mulai', '<', $jamSelesai)
-                  ->where('jam_selesai', '>', $jamMulai);
+                    ->where('jam_selesai', '>', $jamMulai);
             });
     }
 }

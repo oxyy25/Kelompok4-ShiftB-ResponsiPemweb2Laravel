@@ -13,6 +13,7 @@ class PeminjamanResource extends JsonResource
             'id' => $this->id,
             'judul_kegiatan' => $this->judul_kegiatan,
             'tujuan' => $this->tujuan?->value,
+            'tujuan_label' => $this->tujuan?->label(),
             'keterangan' => $this->keterangan,
             'tanggal' => $this->tanggal?->toDateString(),
             'jam_mulai' => substr((string) $this->jam_mulai, 0, 5),

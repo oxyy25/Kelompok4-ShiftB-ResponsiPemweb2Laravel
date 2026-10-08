@@ -8,9 +8,11 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Support\ApiResponse;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -18,7 +20,14 @@ class AuthController extends Controller
     {
         // only() + $fillable memastikan field 'role' dari client diabaikan.
         // Kolom 'role' memakai default database: mahasiswa.
-        $user = User::create($request->safe()->only(['name', 'email', 'nim', 'no_hp', 'password']));
+        try {
+            $user = User::create($request->safe()->only(['name', 'email', 'nim', 'no_hp', 'password']));
+        } catch (QueryException $e) {
+            // Race antara validasi unique dan insert (dua request bersamaan).
+            throw ValidationException::withMessages([
+                'email' => ['Email sudah terdaftar.'],
+            ]);
+        }
 
         return ApiResponse::created(
             new UserResource($user->refresh()),
@@ -47,15 +56,21 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->user()?->currentAccessToken()?->delete();
 
         return ApiResponse::success(null, 'Logout berhasil');
     }
 
     public function me(Request $request): JsonResponse
     {
+        $user = $request->user();
+
+        if (! $user) {
+            return ApiResponse::error('Belum login atau token tidak valid.', 401);
+        }
+
         return ApiResponse::success(
-            new UserResource($request->user()),
+            new UserResource($user),
             'Profil pengguna'
         );
     }

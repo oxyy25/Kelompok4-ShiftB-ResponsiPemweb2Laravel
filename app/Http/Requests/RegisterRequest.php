@@ -15,11 +15,18 @@ class RegisterRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('email'))) {
+            $this->merge(['email' => strtolower(trim($this->input('email')))]);
+        }
+    }
+
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email:rfc', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'string', 'lowercase', 'email:rfc', 'max:255', 'unique:users,email'],
             'nim' => ['nullable', 'string', 'max:20', 'unique:users,nim'],
             'no_hp' => ['nullable', 'string', 'max:20', 'regex:/^(\+62|62|0)[0-9]{8,15}$/'],
             'password' => ['required', 'string', 'confirmed', Password::min(8)],

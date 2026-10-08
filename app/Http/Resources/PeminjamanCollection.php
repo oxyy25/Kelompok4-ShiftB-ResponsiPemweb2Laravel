@@ -12,6 +12,6 @@ class PeminjamanCollection extends ResourceCollection
 
     public function toArray(Request $request): array
     {
-        return $this->collection->map(fn (PeminjamanResource $item) => $item->toArray($request))->all();
+        return $this->collection->map(fn ($item) => $item instanceof PeminjamanResource ? $item->toArray($request) : (new PeminjamanResource($item))->toArray($request))->all();
     }
 }

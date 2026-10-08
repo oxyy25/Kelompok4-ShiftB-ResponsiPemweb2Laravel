@@ -8,9 +8,11 @@ use App\Http\Requests\StoreAlatRequest;
 use App\Http\Requests\UpdateAlatRequest;
 use App\Http\Resources\AlatResource;
 use App\Models\Alat;
+use App\Models\Peminjaman;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AlatController extends ApiController
 {
@@ -37,6 +39,8 @@ class AlatController extends ApiController
     /** POST /api/alats (admin) */
     public function store(StoreAlatRequest $request): JsonResponse
     {
+        Gate::authorize('create', Alat::class);
+
         $alat = Alat::create($request->validated());
 
         return ApiResponse::created(new AlatResource($alat->load('lab')), 'Alat berhasil ditambahkan');
@@ -45,6 +49,8 @@ class AlatController extends ApiController
     /** PUT /api/alats/{alat} (admin) */
     public function update(UpdateAlatRequest $request, Alat $alat): JsonResponse
     {
+        Gate::authorize('update', $alat);
+
         $alat->update($request->validated());
 
         return ApiResponse::success(new AlatResource($alat->fresh('lab')), 'Alat berhasil diperbarui');
@@ -53,8 +59,10 @@ class AlatController extends ApiController
     /** DELETE /api/alats/{alat} (admin) */
     public function destroy(Alat $alat): JsonResponse
     {
+        Gate::authorize('delete', $alat);
+
         $dipakai = $alat->peminjaman()
-            ->whereIn('peminjamas.status', [StatusPeminjaman::Diajukan->value, StatusPeminjaman::Disetujui->value])
+            ->whereIn((new Peminjaman)->getTable().'.status', [StatusPeminjaman::Diajukan->value, StatusPeminjaman::Disetujui->value])
             ->exists();
 
         if ($dipakai) {

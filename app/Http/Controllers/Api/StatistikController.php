@@ -8,15 +8,19 @@ use App\Models\Alat;
 use App\Models\Lab;
 use App\Models\Peminjaman;
 use App\Models\User;
+use App\Models\User as UserModel;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class StatistikController extends ApiController
 {
     /** GET /api/statistik (admin) */
     public function index(): JsonResponse
     {
+        Gate::authorize('viewAny', UserModel::class);
+
         $perStatus = Peminjaman::query()->toBase()
             ->select('status')
             ->selectRaw('count(*) as total')
@@ -30,6 +34,8 @@ class StatistikController extends ApiController
 
         $labTerpopuler = DB::table('peminjamas as p')
             ->join('labs as l', 'l.id', '=', 'p.lab_id')
+            ->whereIn('p.status', [StatusPeminjaman::Disetujui->value, StatusPeminjaman::Selesai->value])
+            ->whereNull('l.deleted_at')
             ->select('l.id', 'l.kode', 'l.nama')
             ->selectRaw('count(*) as total_peminjaman')
             ->groupBy('l.id', 'l.kode', 'l.nama')

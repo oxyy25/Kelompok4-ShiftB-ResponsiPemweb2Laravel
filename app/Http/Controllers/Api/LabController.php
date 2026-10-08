@@ -111,12 +111,12 @@ class LabController extends ApiController
         Gate::authorize('delete', $lab);
 
         $masihDipakai = Peminjaman::where('lab_id', $lab->id)
-            ->where('status', StatusPeminjaman::Disetujui->value)
+            ->whereIn('status', [StatusPeminjaman::Diajukan->value, StatusPeminjaman::Disetujui->value])
             ->where('tanggal', '>=', now()->toDateString())
             ->exists();
 
         if ($masihDipakai) {
-            throw new BusinessRuleException('Lab masih memiliki peminjaman disetujui yang akan datang, tidak dapat dihapus.', 409);
+            throw new BusinessRuleException('Lab masih memiliki pengajuan/peminjaman aktif yang akan datang, tidak dapat dihapus.', 409);
         }
 
         $lab->delete();

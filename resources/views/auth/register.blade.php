@@ -2,60 +2,56 @@
 @section('title', 'Daftar')
 
 @section('content')
-<main class="auth-wrap d-flex align-items-center justify-content-center p-3">
-    <div class="auth-card p-4 p-md-5 my-3">
-        <h1 class="h4 mb-1">Buat akun mahasiswa</h1>
-        <p class="text-secondary mb-4">Akun dipakai untuk melihat jadwal dan mengajukan peminjaman lab.</p>
+<main class="container py-5" style="max-width: 520px">
+    <p class="kicker mb-1">Akun</p>
+    <h1 class="fw-bold mb-1">Buat akun mahasiswa</h1>
+    <p class="text-secondary mb-4">Akun dipakai untuk melihat jadwal dan mengajukan peminjaman lab. Akun baru otomatis berperan mahasiswa.</p>
 
-        <form id="registerForm" novalidate>
-            <div class="mb-3">
-                <label for="name" class="form-label">Nama lengkap</label>
-                <input type="text" class="form-control" id="name" name="name" autocomplete="name" required>
-                <div class="invalid-feedback" data-error-for="name"></div>
+    <form id="registerForm" novalidate>
+        <div class="mb-3">
+            <label for="name" class="form-label">Nama lengkap</label>
+            <input type="text" class="form-control" id="name" name="name" autocomplete="name" required>
+            <div class="invalid-feedback" data-error-for="name"></div>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" autocomplete="email" required>
+            <div class="invalid-feedback" data-error-for="email"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6 mb-3">
+                <label for="nim" class="form-label">NIM <span class="text-secondary small">(opsional)</span></label>
+                <input type="text" class="form-control" id="nim" name="nim" maxlength="20">
+                <div class="invalid-feedback" data-error-for="nim"></div>
             </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" autocomplete="email" required>
-                <div class="invalid-feedback" data-error-for="email"></div>
+            <div class="col-sm-6 mb-3">
+                <label for="no_hp" class="form-label">No. HP <span class="text-secondary small">(opsional)</span></label>
+                <input type="tel" class="form-control" id="no_hp" name="no_hp" placeholder="081234567890" maxlength="20">
+                <div class="invalid-feedback" data-error-for="no_hp"></div>
             </div>
-            <div class="row">
-                <div class="col-sm-6 mb-3">
-                    <label for="nim" class="form-label">NIM <span class="text-secondary small">(opsional)</span></label>
-                    <input type="text" class="form-control" id="nim" name="nim" maxlength="20">
-                    <div class="invalid-feedback" data-error-for="nim"></div>
-                </div>
-                <div class="col-sm-6 mb-3">
-                    <label for="no_hp" class="form-label">No. HP <span class="text-secondary small">(opsional)</span></label>
-                    <input type="tel" class="form-control" id="no_hp" name="no_hp" placeholder="081234567890" maxlength="20">
-                    <div class="invalid-feedback" data-error-for="no_hp"></div>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" autocomplete="new-password" required>
-                <div class="form-text">Minimal 8 karakter.</div>
-                <div class="invalid-feedback" data-error-for="password"></div>
-            </div>
-            <div class="mb-4">
-                <label for="password_confirmation" class="form-label">Ulangi password</label>
-                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password" required>
-                <div class="invalid-feedback" data-error-for="password_confirmation"></div>
-            </div>
-            <button type="submit" class="btn btn-teal w-100" id="btnSubmit">Buat akun</button>
-        </form>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" autocomplete="new-password" required>
+            <div class="form-text">Minimal 8 karakter.</div>
+            <div class="invalid-feedback" data-error-for="password"></div>
+        </div>
+        <div class="mb-4">
+            <label for="password_confirmation" class="form-label">Ulangi password</label>
+            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password" required>
+            <div class="invalid-feedback" data-error-for="password_confirmation"></div>
+        </div>
+        <button type="submit" class="act btn w-100" id="btnSubmit">Buat akun mahasiswa</button>
+    </form>
 
-        <p class="text-center mt-4 mb-0 small">
-            Sudah punya akun? <a class="link-teal" href="{{ route('login') }}">Masuk</a>
-        </p>
-    </div>
+    <p class="text-center mt-4 mb-0 small">
+        Sudah punya akun? <a class="link-ink" href="{{ route('login') }}">Masuk ke akun</a>
+    </p>
 </main>
 @endsection
 
 @push('scripts')
 <script>
-    // lab.js dimuat sebagai ES module Vite (deferred), jadi tunggu window.Api siap
-    // sebelum memasang listener. Tanpa ini, akses Api langsung melempar ReferenceError
-    // dan form kembali ke submit native (halaman hanya reload).
     function bootWhenApiReady(fn, attempts = 100) {
         if (window.Api) { fn(); return; }
         if (attempts <= 0) return;

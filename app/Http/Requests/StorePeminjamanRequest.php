@@ -23,9 +23,9 @@ class StorePeminjamanRequest extends FormRequest
             'tanggal' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'jam_mulai' => ['required', 'date_format:H:i'],
             'jam_selesai' => ['required', 'date_format:H:i', 'after:jam_mulai'],
-            'alat' => ['sometimes', 'array'],
+            'alat' => ['sometimes', 'array', 'max:50'],
             'alat.*.alat_id' => ['required', 'integer', 'distinct', 'exists:alats,id'],
-            'alat.*.jumlah' => ['required', 'integer', 'min:1'],
+            'alat.*.jumlah' => ['required', 'integer', 'min:1', 'max:100000'],
         ];
     }
 
@@ -42,6 +42,8 @@ class StorePeminjamanRequest extends FormRequest
             'alat.*.alat_id.exists' => 'Alat tidak ditemukan.',
             'alat.*.alat_id.distinct' => 'Alat yang sama tidak boleh dipilih dua kali.',
             'alat.*.jumlah.min' => 'Jumlah alat minimal 1.',
+            'alat.max' => 'Maksimal 50 jenis alat dalam satu pengajuan.',
+            'alat.*.jumlah.max' => 'Jumlah alat terlalu besar.',
         ];
     }
 }

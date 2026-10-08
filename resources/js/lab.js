@@ -1,5 +1,5 @@
 /**
- * Helper frontend SiPinLab: pemanggil API (fetch), penyimpanan token, toast, error validasi.
+ * Helper frontend PinLab: pemanggil API (fetch), penyimpanan token, toast, error validasi.
  */
 const Api = {
     base: '/api',
@@ -104,11 +104,34 @@ function setLoading(button, loading, text = 'Memproses...') {
 /* ---------- Navbar sesuai status login ---------- */
 function renderNavAuth() {
     const slot = document.getElementById('navAuth');
+    const links = document.getElementById('navLinks');
     if (!slot) return;
     const user = Api.user();
+    const isAdmin = !!(user && user.role === 'admin');
+    const path = window.location.pathname;
+    const items = [
+        { href: '/', label: 'Beranda' },
+        { href: '/labs', label: 'Lab' },
+        ...(Api.isLoggedIn() ? [
+            { href: '/alats', label: 'Alat' },
+            { href: '/peminjaman', label: 'Peminjaman' },
+        ] : []),
+        ...(isAdmin ? [{ href: '/admin', label: 'Dasbor admin' }] : []),
+    ];
+    if (links) {
+        links.innerHTML = '';
+        items.forEach((it) => {
+            const a = document.createElement('a');
+            a.className = 'nav-link' + (path === it.href ? ' active' : '');
+            a.href = it.href;
+            a.textContent = it.label;
+            if (path === it.href) a.setAttribute('aria-current', 'page');
+            links.appendChild(a);
+        });
+    }
     if (Api.isLoggedIn() && user) {
-        slot.innerHTML = `<span class="navbar-text text-white-50 me-3 small"></span>
-            <button class="btn btn-sm btn-outline-light" id="btnLogout">Keluar</button>`;
+        slot.innerHTML = `<span class="text-secondary small me-1"></span>
+            <button class="btn btn-sm act-ghost act-sm" id="btnLogout">Keluar</button>`;
         slot.querySelector('span').textContent = `${user.name} (${user.role_label})`;
         document.getElementById('btnLogout').addEventListener('click', async () => {
             if (!confirm('Yakin ingin keluar?')) return;
@@ -117,11 +140,83 @@ function renderNavAuth() {
             window.location.href = '/login';
         });
     } else {
-        slot.innerHTML = `<a class="btn btn-sm btn-outline-light me-2" href="/login">Masuk</a>
-            <a class="btn btn-sm btn-light" href="/register">Daftar</a>`;
+        slot.innerHTML = `<a class="btn btn-sm act-ghost act-sm" href="/login">Masuk</a>
+            <a class="btn btn-sm act act-sm" href="/register">Daftar</a>`;
     }
 }
 document.addEventListener('DOMContentLoaded', renderNavAuth);
+
+/* ---------- Penjaga halaman ---------- */
+function requireLogin() {
+    if (!Api.isLoggedIn()) {
+        window.location.href = '/login';
+        return false;
+    }
+    return true;
+}
+function requireAdmin() {
+    if (!requireLogin()) return false;
+    const user = Api.user();
+    if (!user || user.role !== 'admin') {
+        window.location.href = '/';
+        return false;
+    }
+    return true;
+}
+function currentUser() { return Api.user(); }
+function isAdmin() { const u = Api.user(); return !!(u && u.role === 'admin'); }
+
+/* ---------- Lencana status peminjaman ---------- */
+function statusBadge(status) {
+    const allowed = ['diajukan', 'disetujui', 'selesai', 'ditolak', 'dibatalkan'];
+    const key = allowed.includes(status) ? status : 'dibatalkan';
+    const span = document.createElement('span');
+    span.className = `badge badge-status st-${key}`;
+    span.textContent = status;
+    return span;
+}
+
+/* ---------- Status error daftar: sebut penyebab dan langkah lanjutan ---------- */
+function failState(el, message) {
+    if (!el) return;
+    el.className = 'alert alert-danger';
+    el.textContent = `${message} Periksa koneksi lalu muat ulang halaman.`;
+}
+
+/* ---------- Pager sederhana dari meta paginasi API ---------- */
+function renderPager(slot, meta, onPage) {
+    if (!slot || !meta || meta.last_page <= 1) {
+        if (slot) slot.innerHTML = '';
+        return;
+    }
+    slot.innerHTML = '';
+    const wrap = document.createElement('nav');
+    wrap.setAttribute('aria-label', 'Navigasi halaman');
+    const ul = document.createElement('ul');
+    ul.className = 'pagination';
+    [[`Sebelumnya`, meta.current_page - 1, meta.current_page <= 1],
+     [`Berikutnya`, meta.current_page + 1, meta.current_page >= meta.last_page]].forEach(([label, page, disabled]) => {
+        const li = document.createElement('li');
+        li.className = 'page-item' + (disabled ? ' disabled' : '');
+        const btn = document.createElement('button');
+        btn.className = 'page-link';
+        btn.type = 'button';
+        btn.textContent = label;
+        btn.disabled = disabled;
+        if (!disabled) btn.addEventListener('click', () => onPage(page));
+        li.appendChild(btn);
+        ul.appendChild(li);
+    });
+    const info = document.createElement('li');
+    info.className = 'page-item disabled';
+    const span = document.createElement('span');
+    span.className = 'page-link';
+    span.textContent = `Halaman ${meta.current_page} dari ${meta.last_page}`;
+    info.appendChild(span);
+    ul.appendChild(info);
+    wrap.appendChild(ul);
+    slot.appendChild(wrap);
+}
 
 // Diekspos ke window karena dimuat sebagai ES module via Vite (@vite),
 // sedangkan inline <script> di blade mengaksesnya sebagai global.
@@ -131,3 +226,10 @@ window.clearFieldErrors = clearFieldErrors;
 window.showFieldErrors = showFieldErrors;
 window.setLoading = setLoading;
 window.renderNavAuth = renderNavAuth;
+window.requireLogin = requireLogin;
+window.requireAdmin = requireAdmin;
+window.currentUser = currentUser;
+window.isAdmin = isAdmin;
+window.statusBadge = statusBadge;
+window.renderPager = renderPager;
+window.failState = failState;
