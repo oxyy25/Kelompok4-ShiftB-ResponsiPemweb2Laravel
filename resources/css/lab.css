@@ -1,0 +1,15 @@
+:root {
+    --ink: #12263a;
+    --teal: #0d7c86;
+    --teal-dark: #0a5f67;
+    --paper: #f4f7f8;
+}
+body { font-family: 'IBM Plex Sans', system-ui, sans-serif; background: var(--paper); color: var(--ink); }
+.navbar-sipinlab { background: var(--ink); }
+.navbar-brand { font-weight: 700; letter-spacing: .01em; }
+.btn-teal { background: var(--teal); border-color: var(--teal); color: #fff; }
+.btn-teal:hover, .btn-teal:focus { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
+.link-teal { color: var(--teal); }
+.auth-wrap { min-height: calc(100vh - 56px); }
+.auth-card { max-width: 440px; width: 100%; border: 1px solid #d5dee2; border-radius: .5rem; background: #fff; }
+.form-control:focus { border-color: var(--teal); box-shadow: 0 0 0 .2rem rgba(13,124,134,.2); }

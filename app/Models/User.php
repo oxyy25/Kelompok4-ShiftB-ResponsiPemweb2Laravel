@@ -14,7 +14,11 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-        'name', 'email', 'password', 'nim', 'no_hp', 'role',
+        'name', 'email', 'password', 'nim', 'no_hp',
+    ];
+
+    protected $attributes = [
+        'role' => 'mahasiswa',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -36,5 +40,10 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === RoleUser::Admin;
+    }
+
+    public function tokenAbilities(): array
+    {
+        return ($this->role ?? RoleUser::Mahasiswa)->abilities();
     }
 }
