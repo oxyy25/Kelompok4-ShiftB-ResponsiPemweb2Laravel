@@ -14,7 +14,7 @@
 | No | Nama Lengkap | NIM | Shift Awal | Shift Akhir | Jobdesk / Kontribusi | Link Video Penjelasan |
 |---|---|---|---|---|---|---|
 | 1 | M.Fawaz Akbar | H1H024046 | Shift B | Shift B | CRUD Login & Register, Frontend Web | [YouTube/Drive](https://...) |
-| 2 | [Nama Lengkap] | [NIM] | [Shift Awal] | [Shift Akhir] | [Jobdesk Fitur] | [YouTube/Drive](https://...) |
+| 2 | Finda Wulan Febrianti | H1H024055 | [Shift C ] | [Shift B ] | Database: Migration, Model, Seeder | [YouTube/Drive](https://...) |
 | 3 | [Nama Lengkap] | [NIM] | [Shift Awal] | [Shift Akhir] | [Jobdesk Fitur] | [YouTube/Drive](https://...) |
 
 ---
