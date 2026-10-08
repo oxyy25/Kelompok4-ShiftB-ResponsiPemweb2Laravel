@@ -28,7 +28,7 @@
 
 <footer class="site-foot mt-5">
     <div class="container py-3">
-        PinLab, portal peminjaman laboratorium Teknik Komputer. Operasional 08.00 sampai 17.00.
+        PinLab, portal peminjaman laboratorium. Operasional 08.00 sampai 17.00.
     </div>
 </footer>
 

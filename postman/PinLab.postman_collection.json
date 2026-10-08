@@ -1,0 +1,504 @@
+{
+    "info": {
+        "name": "PinLab API",
+        "description": "Koleksi endpoint API PinLab (peminjaman laboratorium). Cara pakai: 1) impor file ini + environment \"PinLab Local\" ke Postman, 2) jalankan folder Auth > Login admin (token tersimpan otomatis), 3) jalankan request lain berurutan. ID lab, alat, peminjaman, dan user tersimpan otomatis dari respons create.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "exec": [
+                    "const besok = new Date(Date.now() + 86400000);",
+                    "pm.collectionVariables.set('tomorrow', besok.toISOString().slice(0, 10));"
+                ],
+                "type": "text/javascript"
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8000/api"
+        },
+        {
+            "key": "token",
+            "value": ""
+        },
+        {
+            "key": "labId",
+            "value": "1"
+        },
+        {
+            "key": "alatId",
+            "value": "1"
+        },
+        {
+            "key": "peminjamanId",
+            "value": "1"
+        },
+        {
+            "key": "userId",
+            "value": "2"
+        },
+        {
+            "key": "tomorrow",
+            "value": ""
+        }
+    ],
+    "item": [
+        {
+            "name": "1 Auth",
+            "item": [
+                {
+                    "name": "Register mahasiswa",
+                    "request": {
+                        "auth": { "type": "noauth" },
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/auth/register",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{$randomFullName}}\",\n    \"email\": \"coba_{{$timestamp}}@mail.test\",\n    \"nim\": \"H1D024{{$randomInt}}\",\n    \"no_hp\": \"081234567890\",\n    \"password\": \"Test1234\",\n    \"password_confirmation\": \"Test1234\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Register 201', () => pm.response.to.have.status(201));"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login admin",
+                    "request": {
+                        "auth": { "type": "noauth" },
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/auth/login",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"{{adminEmail}}\",\n    \"password\": \"{{adminPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                                    "const j = pm.response.json();",
+                                    "pm.collectionVariables.set('token', j.data.token);",
+                                    "pm.collectionVariables.set('userId', j.data.user.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login mahasiswa",
+                    "request": {
+                        "auth": { "type": "noauth" },
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/auth/login",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"{{mhsEmail}}\",\n    \"password\": \"{{mhsPassword}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                                    "const j = pm.response.json();",
+                                    "pm.collectionVariables.set('token', j.data.token);",
+                                    "pm.collectionVariables.set('userId', j.data.user.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Profil saya",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/auth/me"
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Me 200', () => pm.response.to.have.status(200));"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/auth/logout"
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Logout 200', () => pm.response.to.have.status(200));",
+                                    "pm.collectionVariables.set('token', '');"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "2 Lab publik",
+            "item": [
+                {
+                    "name": "Daftar lab",
+                    "request": {
+                        "auth": { "type": "noauth" },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/labs?q=&min_kapasitas=&page=1",
+                            "query": [
+                                { "key": "q", "value": "" },
+                                { "key": "min_kapasitas", "value": "" },
+                                { "key": "page", "value": "1" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Detail lab",
+                    "request": {
+                        "auth": { "type": "noauth" },
+                        "method": "GET",
+                        "url": "{{baseUrl}}/labs/{{labId}}"
+                    }
+                },
+                {
+                    "name": "Jadwal lab per tanggal",
+                    "request": {
+                        "auth": { "type": "noauth" },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/labs/{{labId}}/jadwal?tanggal={{tomorrow}}",
+                            "query": [{ "key": "tanggal", "value": "{{tomorrow}}" }]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3 Alat",
+            "item": [
+                {
+                    "name": "Daftar alat",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/alats?lab_id=&kondisi=&q=&page=1",
+                            "query": [
+                                { "key": "lab_id", "value": "" },
+                                { "key": "kondisi", "value": "" },
+                                { "key": "q", "value": "" },
+                                { "key": "page", "value": "1" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Detail alat",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/alats/{{alatId}}"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4 Peminjaman",
+            "item": [
+                {
+                    "name": "Daftar peminjaman",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/peminjaman?status=&lab_id=&tanggal=&q=&page=1",
+                            "query": [
+                                { "key": "status", "value": "" },
+                                { "key": "lab_id", "value": "" },
+                                { "key": "tanggal", "value": "" },
+                                { "key": "q", "value": "" },
+                                { "key": "page", "value": "1" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buat pengajuan",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/peminjaman",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"lab_id\": {{labId}},\n    \"judul_kegiatan\": \"Praktikum basis data\",\n    \"tujuan\": \"praktikum_pengganti\",\n    \"keterangan\": \"Kelas A\",\n    \"tanggal\": \"{{tomorrow}}\",\n    \"jam_mulai\": \"09:00\",\n    \"jam_selesai\": \"11:00\",\n    \"alat\": [{ \"alat_id\": {{alatId}}, \"jumlah\": 1 }]\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Pengajuan 201', () => pm.response.to.have.status(201));",
+                                    "pm.collectionVariables.set('peminjamanId', pm.response.json().data.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Detail peminjaman",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/peminjaman/{{peminjamanId}}"
+                    }
+                },
+                {
+                    "name": "Ubah pengajuan",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/peminjaman/{{peminjamanId}}",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"judul_kegiatan\": \"Praktikum basis data revisi\",\n    \"keterangan\": \"Kelas A dan B\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Batalkan pengajuan",
+                    "request": {
+                        "method": "PATCH",
+                        "url": "{{baseUrl}}/peminjaman/{{peminjamanId}}/batalkan"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5 Admin lab dan alat",
+            "item": [
+                {
+                    "name": "Tambah lab",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/labs",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"kode\": \"LAB-{{$timestamp}}\",\n    \"nama\": \"Lab Uji Coba\",\n    \"lokasi\": \"Gedung C Ruang 301\",\n    \"kapasitas\": 30,\n    \"deskripsi\": \"Lab untuk pengujian Postman.\",\n    \"is_active\": true\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Lab 201', () => pm.response.to.have.status(201));",
+                                    "pm.collectionVariables.set('labId', pm.response.json().data.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Ubah lab",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/labs/{{labId}}",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nama\": \"Lab Uji Coba Revisi\",\n    \"kapasitas\": 35\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Hapus lab",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/labs/{{labId}}"
+                    }
+                },
+                {
+                    "name": "Tambah alat",
+                    "request": {
+                        "method": "POST",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/alats",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"lab_id\": {{labId}},\n    \"nama\": \"Kabel HDMI\",\n    \"stok\": 10,\n    \"kondisi\": \"baik\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Alat 201', () => pm.response.to.have.status(201));",
+                                    "pm.collectionVariables.set('alatId', pm.response.json().data.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Ubah alat",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/alats/{{alatId}}",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"stok\": 12,\n    \"kondisi\": \"baik\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Hapus alat",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/alats/{{alatId}}"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "6 Admin review dan statistik",
+            "item": [
+                {
+                    "name": "Setujui pengajuan",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/peminjaman/{{peminjamanId}}/setujui",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"catatan_admin\": \"Disetujui, jaga kebersihan lab.\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Tolak pengajuan",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/peminjaman/{{peminjamanId}}/tolak",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"catatan_admin\": \"Jadwal bentrok dengan kegiatan jurusan.\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Tandai selesai",
+                    "request": {
+                        "method": "PATCH",
+                        "url": "{{baseUrl}}/peminjaman/{{peminjamanId}}/selesai"
+                    }
+                },
+                {
+                    "name": "Hapus data final",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/peminjaman/{{peminjamanId}}"
+                    }
+                },
+                {
+                    "name": "Statistik",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/statistik"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "7 Admin pengguna",
+            "item": [
+                {
+                    "name": "Daftar pengguna",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/users?role=&q=&page=1",
+                            "query": [
+                                { "key": "role", "value": "" },
+                                { "key": "q", "value": "" },
+                                { "key": "page", "value": "1" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Detail pengguna",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/users/{{userId}}"
+                    }
+                },
+                {
+                    "name": "Ubah pengguna",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "url": "{{baseUrl}}/users/{{userId}}",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"no_hp\": \"081234567899\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Hapus pengguna",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/users/{{userId}}"
+                    }
+                }
+            ]
+        }
+    ]
+}
