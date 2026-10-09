@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|
 | 1 | M.Fawaz Akbar | H1H024046 | Shift B | Shift B | CRUD Login & Register, Frontend Web | [YouTube](https://youtu.be/m-PmxZZwNr4) |
 | 2 | Finda Wulan Febrianti | H1H024055 | Shift C | Shift B| Database: Migration, Model, Seeder | YouTube (https://youtu.be/5_gY-6p-EGI) |
-| 3 | Fathah Ikhwansyah | H1H024063 | Shift A | Shift B | Backend REST API: CRUD Lab, Alat dan Pengguna | [YouTube/Drive](https://...) |
+| 3 | Fathah Ikhwansyah | H1H024063 | Shift A | Shift B | Backend REST API: CRUD Lab, Alat dan Pengguna | [Drive]((https://drive.google.com/drive/folders/1AbDn8OxgOS8-CSV73Sr_OsxsoOKGkZoo?usp=sharing)) |
 
 ---
 
